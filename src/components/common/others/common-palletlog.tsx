@@ -19,8 +19,9 @@ const CommonStocklog = (props:any) => {
   const [SelectedNotes, SetSelectedNotes] = useState([])
 
   useEffect(() => {
-    console.log('props customers detials',customer)
+    console.log('props record^^113',props.record)
     console.log('transaction types',trans)
+
 	  setOpen(props.open)
   }, [props.open])
 
@@ -28,10 +29,7 @@ const CommonStocklog = (props:any) => {
 	  props.onDialogClose(false)
   }
 
-  //getSelectOptions('', 'Customer/GetAllSimpleCustomer').then(res => setCustomerOptions(res))
-  //getSelectOptions('', 'TranType/GetAllTranType').then(res => {SetTran(res)}) 
 
-  //# use for alt plate type value
   const changeValue =(key:number,value:number)=>{
     switch(key){
       case 1:
@@ -57,15 +55,17 @@ const CommonStocklog = (props:any) => {
     console.log('tran type is:',fieldsValue['TranTypeId'])
     console.log('qty is:',fieldsValue['PlateQty'])
     console.log('notes is',fieldsValue['Notes'])
-
     debugger;
+    let balance = changeValue(parseInt(props.record.tranTypeId),parseInt(fieldsValue['PlateQty']))
+    let quant = changeValue(parseInt(props.record.tranTypeId),parseInt(fieldsValue['PlateQty']))
+
     const datas={
       DispatchId: props.record.dispatchId,
       EmployeeId: props.record.employeeId,
       CustomerId: props.record.customerId,
       PlateTypeId:props.record.plateTypeId,
-      Balance:changeValue(props.record.plateTypeId,fieldsValue['PlateQty']),
-      Quantity:changeValue(props.record.plateTypeId,fieldsValue['PlateQty']),
+      Balance:balance,
+      Quantity:quant,
       Notes:fieldsValue['Notes'],
       StockId:props.record.stockId,
 
@@ -76,8 +76,11 @@ const CommonStocklog = (props:any) => {
       data:datas,
       method:'post'
     }).then((res:any)=>{
-      console.log(res)
-      props.onDialogClose()
+      console.log('updated log callback date @@999',res)
+      if(res.data.success == true){
+        props.onDialogClose()
+      }
+
     })
 
   }
@@ -108,7 +111,7 @@ const CommonStocklog = (props:any) => {
                 >
                   {
                     props.tranType.map(
-                      (x:any) => <option key={x.index} value={x.tranTypeId}>{x.tranName}</option>
+                      (x:any) => <Select.Option key={x.index} value={x.tranTypeId}>{x.tranName}</Select.Option>
                     )
                   }
                 </Select>
@@ -135,35 +138,5 @@ const CommonStocklog = (props:any) => {
 
 export default CommonStocklog
 
-/*
-<Form.Item
-                name='SelectedCustomer'
-                label='Customers:'
-                style={ {width: '40%', margin: '0 auto 1rem'}}             
-              >             
-                <Select
-                >
-                  {
-                    props.customerOptions.map(
-                      (x:any) => <option key={x.index} value={x.customerId}>{x.company}</option>
-                    )
-                  }
-                </Select>
-              </Form.Item>
 
-              <Form.Item
-                name='plateTypes'
-                label='PlateTypes:'
-                style={ {width: '40%', margin: '0 auto 1rem'}}
-              >             
-                <Select
-                >
-                  {
-                    props.plateTypes.map(
-                      (x:any) => <option key={x.index} value={x.plateTypeId}>{x.plateTypeName}</option>
-                    )
-                  }
-                </Select>
-              </Form.Item>
-
-*/    
+   

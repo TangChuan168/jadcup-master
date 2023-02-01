@@ -43,7 +43,7 @@ export const commonFormSelect = (urlInfoKey: string, data: any, valueJoinArray?:
         }
       } }
     >
-      {
+      {      
         data.map((row: any, index: number) => row && (
           <Option value={valueKeyString ? row[valueKeyString] : row[id]} key={index.toString()}>
             {

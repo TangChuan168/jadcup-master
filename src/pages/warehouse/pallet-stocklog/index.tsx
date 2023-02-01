@@ -29,11 +29,9 @@ const Palletstocklog = () => {
   const [open, setOpen] = useState(false)// palletstock log dialog open
   const [record,setRecord] = useState({})
   const [showCard,setShowCard] = useState(false)
-  const [conditions, setConditions] = useState({
-    tranType:null,
-    times:[],
-    defaultTime: true,
-    
+  const [conditions, setConditions] = useState<any>({
+    type:null,
+    timeRange:[]
   })
 
 
@@ -50,7 +48,12 @@ const Palletstocklog = () => {
       SetTran(res)
       console.log('SetTran useeffect #555', res)
     });
-  }, [])
+  }, [open])
+
+  useEffect(()=>{
+    console.log('component updates called after date updates')
+    SetCustomers(DataFilter1(CustomerFull,conditions))
+  },[conditions])
 
 
   const parm ={
@@ -60,6 +63,7 @@ const Palletstocklog = () => {
   }
 
   const handleClose = () =>{
+    console.log('log close is called')
     setOpen(false)
   }
 
@@ -77,7 +81,7 @@ const Palletstocklog = () => {
         res => {
           SetCustomerFull(res.data.data)//full data
           console.log('customer detials',res.data.data)
-          SetCustomers(DataFilter(res.data.data))         
+          SetCustomers(DataFilter1(res.data.data,conditions))         
         }         
     )
     //fetch stock log
@@ -94,17 +98,22 @@ const Palletstocklog = () => {
     )
   }
 
-  const handleTypechange = (ChangedValues:string, value: any) =>{
-    console.log('Idvalue', value) //value['customerId']
-    SetCustomers(DataFilter(CustomerFull,value['transactionTypeId']))
+  const handleTypechange = (ChangedValues:any, value: any) =>{
+    console.log('Typevalue1', value) //value['customerId']
+    console.log('ChangedValues2',ChangedValues)
+    console.log('parseIntValue3',parseInt(value['tranTypeId']))
+    let update= parseInt(value['tranTypeId'])+1
+    console.log('parseIntValue4',update)
+    setConditions({...conditions,type:update})
+    console.log('updated conditions Data@@@@@@@1111',conditions);
+    //SetCustomers(DataFilter1(CustomerFull,conditions))
   }
 
   const handleRangePicker = (value:any, dateString:[string, string])=>{
-    console.log('picked time value', value)
     console.log('datestring',dateString)
-    //setStart(dateString[0])
-    //setEnd(dateString[1])
-    SetCustomers(DataFilter(CustomerFull,0,[dateString[0],dateString[1]]))
+    setConditions({...conditions,timeRange:[dateString[0],dateString[1]]})
+    console.log('updated conditions Data@@@@@@@1111',conditions);
+   // SetCustomers(DataFilter1(CustomerFull, conditions))
     
   }
 
@@ -115,23 +124,21 @@ const Palletstocklog = () => {
   }
 
 
-
-  const DataFilter = (dataSet:any[],type?:number, timeRange?:[s:string,e:string]) =>{
-    //debugger;
-    if(type && timeRange){
-      let res1 = dataSet.filter(x =>x.tranTypeId == type)
-      const data1= res1?.filter(y=>y.createdAt >= timeRange[0] && y.createdAt <= timeRange[1])
+  const DataFilter1 = (dataSet:any[], conditions:any) =>{
+    if(conditions.type != null && conditions.timeRange.length > 0){
+      let res1 = dataSet.filter(x =>x.tranTypeId == parseInt(conditions.type))
+      const data1= res1?.filter(y=>y.createdAt >= conditions.timeRange[0] && y.createdAt <= conditions.timeRange[1])
       return data1
     }
-    if(type && type!=0){
+    if(conditions.type != null && conditions.timeRange.length == 0){
 
-      const data3= dataSet.filter(x =>x.tranTypeId == type)
+      const data3= dataSet.filter(x =>x.tranTypeId == parseInt(conditions.type))
       return data3
     }
-    if(timeRange){
-     const data4 = dataSet.filter(y=>y.createdAt >= timeRange[0] && y.createdAt <= timeRange[1])
-     return data4
-    }
+    if(conditions.timeRange.length > 0 && conditions.type == null ){
+      const data4 = dataSet.filter(y=>y.createdAt >= conditions.timeRange[0] && y.createdAt <= conditions.timeRange[1])
+      return data4
+     }
     var lastYear = new Date().getFullYear() -1
     const data2 = dataSet.filter(x =>x.createdAt >= lastYear.toString())
     return data2
